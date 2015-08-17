@@ -42,13 +42,15 @@
 
 - (IBAction)requestHealthKitHeartRateAccess:(id)sender {
     [self.appHealthStore requestAuthorizationToShareTypes:[NSSet setWithObject:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate]] readTypes:[NSSet setWithObject:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate]] completion:^(BOOL success, NSError * _Nullable error) {
-        if (success) {
-            self.healthKitStatusLabel.text = @"HealthKit Heart Rate Data Accessible";
-            self.requestHealthKitAccess.hidden = YES;
-        } else {
-            self.requestHealthKitAccess.hidden = NO;
-            self.healthKitStatusLabel.text = @"HealthKit Authorization Request Failed.";
-        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (success) {
+                self.healthKitStatusLabel.text = @"HealthKit Heart Rate Data Accessible";
+                self.requestHealthKitAccess.hidden = YES;
+            } else {
+                self.requestHealthKitAccess.hidden = NO;
+                self.healthKitStatusLabel.text = @"HealthKit Authorization Request Failed.";
+            }
+        });
     }];
 
 }
@@ -57,7 +59,10 @@
     HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate];
     HKSourceQuery *sourceQuery = [[HKSourceQuery alloc] initWithSampleType:sampleType samplePredicate:nil completionHandler:^(HKSourceQuery * _Nonnull query, NSSet<HKSource *> * _Nullable sources, NSError * _Nullable error) {
         self.sourcesData = [sources allObjects];
-        [self performSegueWithIdentifier:@"rootToSources" sender:nil];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self performSegueWithIdentifier:@"rootToSources" sender:nil];
+        });
     }];
     [self.appHealthStore executeQuery:sourceQuery];
 }
@@ -68,7 +73,10 @@
     NSArray *sortDescriptors = @[entryDateDescriptor];
     HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:sampleType predicate:nil limit:100 sortDescriptors:sortDescriptors resultsHandler:^(HKSampleQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable results, NSError * _Nullable error) {
         self.sourcesData = results;
-        [self performSegueWithIdentifier:@"rootToDailyData" sender:nil];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self performSegueWithIdentifier:@"rootToDailyData" sender:nil];
+        });
     }];
     [self.appHealthStore executeQuery:sampleQuery];
     
@@ -83,12 +91,14 @@
                                                                     endDate:[NSDate date]];
     
     [self.appHealthStore saveObject:rateSample withCompletion:^(BOOL success, NSError *error) {
-        if (success) {
-            self.saveStatusLabel.text = @"Heart Rate Data Saved.";
-        } else {
-            self.saveStatusLabel.text = @"Heart Rate Data Not Saved.";
-        }
-        self.dataTextField.text = @"";
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (success) {
+                self.saveStatusLabel.text = @"Heart Rate Data Saved.";
+            } else {
+                self.saveStatusLabel.text = @"Heart Rate Data Not Saved.";
+            }
+            self.dataTextField.text = @"";
+        });
     }];}
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
