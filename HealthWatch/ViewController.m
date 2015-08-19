@@ -30,7 +30,7 @@
 - (void)prepHealthKit {
     if ([HKHealthStore isHealthDataAvailable]) {
         self.appHealthStore = [[HKHealthStore alloc] init];
-        if ([self.appHealthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate]]) {
+        if ([self.appHealthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate]] == HKAuthorizationStatusSharingAuthorized) {
             self.healthKitStatusLabel.text = @"HealthKit Heart Rate Data Accessible";
             self.requestHealthKitAccess.hidden = YES;
         }
